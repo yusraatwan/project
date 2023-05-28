@@ -1,9 +1,70 @@
+<?php
+@include'index.php';
+$error=[];
+$errors=[];
+if(isset($_POST['submit'])){
+  $email=mysqli_real_escape_string($connt,$_POST['email']);
+  $name=mysqli_real_escape_string($connt,$_POST['name']);
+  $pass=md5($_POST['password']);
+  $conpass=md5($_POST['conpassword']);
+  $role= $_POST['role'];
+
+
+//validatte ل للايميل
+  if (empty($email)) {
+    $errors['email_error'] = "*email is required, please fill it";
+} else {
+    if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors['email_error'] = "*please enter valid email ";
+    
+}
+//الباسورد
+if (empty($pass)) {
+    $errors['password_error'] = "*password is required, please fill it";
+} else {
+
+    if (strlen($pass) >= 3) {
+
+        if (!preg_match("/^[0-9 ]*$/", $password)) {
+            $errors['password_error'] = "*Please Enter Just 0-9 ";
+        }
+    } else {
+        $errors['password_error'] = "*Please Enter Mor Than 3 Char";
+    }
+}
+
+//conpassword
+if (count($errors) > 0) {
+    $errors['general_error'] = "*Please Fix All Errors";}
+    //عشان يشوف ازا موجودين ولا لاء
+$select="select *from user where email='$email'  && password='$pass'";
+ $result=mysqli_query($connt,$select);
+if(mysqli_num_rows($result) > 0 ){
+    $error[]='user already exit';
+  }else{
+    //يقارن الباسورد مع الكن باسورد
+    if($pass!=$conpass){
+      $error[]='password not matched';
+    }else{
+      //  يضيف في الداتا بيز
+      $insert="insert into user(name,email,password,role)values('$name','$email','$pass','$role')";
+      mysqli_query($connt,$insert);
+      if($insert){
+        echo"Add sussfull";
+      }else{
+        echo"faild added";
+      }
+      header('location:login.php');
+    }
+  }
+  
+}}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
-<?php
-include "partial/header.php";
 
-?>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -213,7 +274,14 @@ a.button:hover {
 }
 
 .footer{color:#0a0a0a;  font-size: 12px; }
-
+.testbox form .error-msg{
+  margin:10px 0;
+  display: block;
+  background:crimson;
+  color: #fff;
+  border-radius:5px;
+  font-size:20px;
+}
 
     </style>
 </head>
@@ -226,30 +294,38 @@ a.button:hover {
 
   <form action="<?php echo $_SERVER['PHP_SELF'] ?>"method="post">
       <hr>
-    
-  <hr>
+    <hr>
+  
+  <?php
+if(isset($error)){
+  foreach($error as $error){
+    echo'<span class="error-msg">'  .$error.   '</span>';
+  }
+}
+
+?>
   <label id="icon" for="name"><i class="icon-envelope "></i></label>
-  <input type="text" name="name" id="name" placeholder="Email" required/>
+  <input type="text" name="email" id="name" placeholder="Email" required/>
   <label id="icon" for="name"><i class="icon-user"></i></label>
   <input type="text" name="name" id="name" placeholder="Name" required/>
   <label id="icon" for="name"><i class="icon-shield"></i></label>
-  <input type="password" name="name" id="name" placeholder="Password" required/>
+  <input type="password" name="password" id="name" placeholder="Password" required/>
   <label id="icon" for="name"><i class="icon-shield"></i></label>
-  <input type="password" name="name" id="conpasword" placeholder="Confirm Password"/>
-  <div class="gender">
-    <input type="radio" value="None" id="male" name="gender" checked/>
-    <label for="male" class="radio" chec>Male</label>
-    <input type="radio" value="None" id="female" name="gender" />
-    <label for="female" class="radio">Female</label>
-    
-   </div> 
+  <input type="password" name="conpassword" id="conpasword" placeholder="Confirm Password"/>
+  <select name="role">
+  <option value="1">    admin      </option>
+<option value="2">    user      </option>
+
+
+</select>
    <div>
-    <button type="submit" >Sign up</button> 
+    <button type="submit" name="submit">Sign up</button> 
    </div>
 <br/>
 <br/>
 
   </form>
+
   <div class="card-footer">
     <div class="">
         <p  class="footer"class="float-sm-right text-center m-0">Have an Account? <a href="login.php" class="card-link">log in</a></p>

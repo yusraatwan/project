@@ -1,70 +1,137 @@
+<?php
+@include 'index.php';
+// اجيب الايميل والياسورد من الداتا بيز ازا كانو مش 
+// موجودين حيحكي انتا مش مشتخدم ولا ادمن 
+//
+$error = [];
+if (isset($_POST['submit'])) {
+  $email = mysqli_real_escape_string($connt, $_POST['email']);
+
+  $passw = md5($_POST['password']);
+  $select = "select * from user where email='$email'  && password='$passw'";
+  $result = mysqli_query($connt, $select);
+  if (mysqli_num_rows($result) > 0) {
+    $row = mysqli_fetch_array($result);
+    //$row['role'] == '1'اذا كانت
+    //رح يكون ادمن وينقلني ع واجهة shows.php
+   
+    if ($row['role'] == '1') {
+      //$_SESSION['admin_name']=$row['name'];
+      header('location:shows.php');
+      //$row['role'] == '2'اذا كانت
+     
+      ////رح يكون مستخدم وينقلني ع واجهة user.php
+    } elseif ($row['role'] == '2') {
+      // $_SESSION['user_name']=$row['name'];
+
+      header('location:user.php');
+    }
+  } else {
+    $error[] = "you are not admin or user";
+  }
+}
+?>
 
 
 
 <!DOCTYPE html>
 <html>
-<?php
-include "partial/header.php";
-?>
+
 
 <head>
-<meta charset="UTF-8">
-<title>login</title>
-<style>
-  
-    *{margin:0;padding: 0;box-sizing:border-box;}
-   
-    .login { 
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin: -150px 0 0 -150px;
-        width:300px;
-        height:300px;
+  <meta charset="UTF-8">
+  <title>login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .footer{color:#0a0a0a;text-align:center;margin-top:40px; font-size: 20px; }
-    .login h1 { color:#555555; text-shadow: 0px 10px 8px #CDC673; letter-spacing:2px;text-align:center;margin-bottom:20px; }
- 
-    input{
-        padding:10px;
-        width:100%;
-        color:white;
-        margin-bottom:10px;
-       
-        border: 1px solid black;
-        border-radius:4px;
-        letter-spacing:2px;
+
+    .login {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin: -150px 0 0 -150px;
+      width: 300px;
+      height: 300px;
     }
- 
-    form button{
-        width:100%;
-        padding:10px;
-        background-color: #3a57af; 
-        border:1px solid black;
-        border-radius:4px;
-        cursor:pointer; 
-        font-size: 20px;
-         
-    }    
-    
 
+    .footer {
+      color: #0a0a0a;
+      text-align: center;
+      margin-top: 40px;
+      font-size: 20px;
+    }
 
-                                                                                                                                            
-    </style>
+    .login h1 {
+      color: #555555;
+      text-shadow: 0px 10px 8px #CDC673;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 100%;
+
+      margin-bottom: 10px;
+
+      border: 1px solid black;
+      border-radius: 4px;
+      letter-spacing: 2px;
+    }
+
+    form button {
+      width: 100%;
+      padding: 10px;
+      background-color: #3a57af;
+      border: 1px solid black;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 20px;
+
+    }
+
+    .login form .error-msg {
+
+      margin: 10px 0;
+      display: block;
+      background: crimson;
+      color: #fff;
+      border-radius: 5px;
+      font-size: 20px;
+    }
+  </style>
 </head>
+
 <body>
-<div class="login">
-  <h1>Login</h1>
-  <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
-    <input type="text" name="user" placeholder="User Name"required="required">
-    <input type="password" name="password" placeholder="password"required="required">
-  <button type="submit">login</button>
-  </form>
-  <div class="card-footer">
-    <div class="">
-      <p class="footer" class="float-sm-right text-center m-0">New Admin? <a href="register.php" class="card-link">Sign Up</a></p>
-    
+
+  <div class="login">
+
+    <h1>Login</h1>
+    <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
+
+      <?php
+      //طباعة مصفوفة الايرور
+      if (isset($error)) {
+        foreach ($error as $error) {
+          echo '<span class="error-msg">'  . $error .   '</span>';
+        }
+      }
+
+      ?>
+      <input type="email" name="email" placeholder="Enter email" required>
+      <input type="password" name="password" placeholder="password" required="required">
+      <button type="submit" name='submit'>login</button>
+    </form>
+    <div class="card-footer">
+      <div class="">
+        <p class="footer" class="float-sm-right text-center m-0">New Admin? <a href="register.php" class="card-link">Sign Up</a></p>
+
+      </div>
     </div>
-</div>
 </body>
+
 </html>
